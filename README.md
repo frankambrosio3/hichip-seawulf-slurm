@@ -20,7 +20,13 @@ It implements the recommended steps for read alignment, valid pair extraction, q
 ## Workflow Overview
 This pipeline takes raw paired-end FASTQ reads from a HiChIP experiment and produces both genome-wide contact maps and lists of statistically significant chromatin interactions (loops). The overall process follows these major steps:
 1. Alignment of reads to the reference genome
+  - Script: step1.bwa_map_reads.slurm → calls map_reads_2025.sh (alignment script)
+  - Purpose: Map raw HiChIP sequencing reads to the reference genome (mm10 in this case) to produce sorted, aligned read files for each sample.
+  - Output: For each sample, a sorted BAM file containing all aligned read pairs (<SAMPLE>.bam) is written to the bwa-mem_out directory. These BAM files serve as the input for the next step (pair filtering).
 2. Identification of valid paired interactions and removal of duplicates
+  - Script: step2.pairtools_process.slurm → calls pairtools_pipe.sh (pair filtering script)
+  - Purpose: Identify valid HiChIP contacts from the aligned reads, enforce mapping quality filters, remove PCR duplicates, and output the interaction pairs in a standardized format. This step transforms the alignment data into a list of high-confidence paired contacts suitable for analysis.
+  - Output: A .pairs file for each sample, representing the list of deduplicated valid contacts (each entry includes the two genomic coordinates and orientation of a contacting read pair). This is the primary output needed for building contact maps. Additionally, a filtered BAM of valid paired reads is produced (for potential visualization or reuse) along with its index and a summary stats file. The .pairs output from this step feeds into Steps 4–6, while the stats can be used in QC assessments (Step 3).
 3. Library quality assessment and enrichment analysis at ChIP peak loci
 4. Generation of a Hi-C contact matrix in .hic format for visualization
 5. Generation of a binned contact map in Cooler (.cool) format
