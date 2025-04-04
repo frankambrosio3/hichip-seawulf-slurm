@@ -28,9 +28,21 @@ This pipeline takes raw paired-end FASTQ reads from a HiChIP experiment and prod
   - Purpose: Identify valid HiChIP contacts from the aligned reads, enforce mapping quality filters, remove PCR duplicates, and output the interaction pairs in a standardized format. This step transforms the alignment data into a list of high-confidence paired contacts suitable for analysis.
   - Output: A .pairs file for each sample, representing the list of deduplicated valid contacts (each entry includes the two genomic coordinates and orientation of a contacting read pair). This is the primary output needed for building contact maps. Additionally, a filtered BAM of valid paired reads is produced (for potential visualization or reuse) along with its index and a summary stats file. The .pairs output from this step feeds into Steps 4–6, while the stats can be used in QC assessments (Step 3).
 3. Library quality assessment and enrichment analysis at ChIP peak loci
+  - Script: step3.enrichment.slurm → calls get_enrichment_stats.sh (QC metrics script)
+  - Purpose: Evaluate the enrichment of HiChIP read pairs around known binding sites of the target protein, providing quality metrics for the library. This step checks whether the HiChIP experiment successfully captured interactions centered on ChIP-seq peak regions (the expected signal), versus background.
+  - Output: A text report of HiChIP QC metrics (for example, <SAMPLE>_hichip_qc_metrics.txt), listing values such as fraction of reads near peaks and O/E enrichment ratios. This report allows the user to assess library quality (e.g. sufficient enrichment and complexity) before proceeding to loop calling. This step does not produce an output that is used in subsequent pipeline steps; it is an analytical readout for QC only. However, the peak file used here will also be needed for the loop calling in Step 6.
 4. Generation of a Hi-C contact matrix in .hic format for visualization
+  - Script: step4.juicer_contact_matrix.slurm (runs Juicer Tools)
+  - Purpose: Convert the list of valid pairs (contacts) into a genome-wide contact matrix in the .hic format, which is a binary format used for efficient storage, sharing, and visualization of Hi-C/HiChIP maps (in Juicebox).
+  - Output: A <SAMPLE>.hic file containing the contact matrix for that sample at multiple resolutions​. This file is primarily for visualization and sharing. It is not explicitly consumed by later steps in this pipeline (Step 6 uses a different approach for loop calling)
 5. Generation of a binned contact map in Cooler (.cool) format
+  - Script: step5.cooler_contact_map.slurm (runs Cooler cload pairix)
+  - Purpose: Generate a contact matrix in Cooler format (.cool), which is an HDF5-based sparse matrix format widely used for Hi-C data analysis in Python. In this case, a single-resolution contact map (1 kb bins) is created for downstream analysis or visualization.
+  - Output: A <SAMPLE>.cool file storing the contact matrix at 1 kb resolution​.
 6. Chromatin loop calling to identify significant interactions
+  - Script: step6.run_fithichip.slurm (runs FitHiChIP via its HiC-Pro integration script)
+  - Purpose: Identify statistically significant chromatin interactions (loops) from the HiChIP contact data, using peaks as anchors. This is the final analytical step, yielding a list of chromatin loops enriched for the protein of interest.
+  - Output: For each sample, FitHiChIP produces a set of loop calls, typically as a text file.
 
 ```mermaid
 flowchart TB
