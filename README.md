@@ -21,7 +21,7 @@ It implements the recommended steps for read alignment, valid pair extraction, q
 This pipeline takes raw paired-end FASTQ reads from a HiChIP experiment and produces both genome-wide contact maps and lists of statistically significant chromatin interactions (loops). The overall process follows these major steps:
 1. Alignment of reads to the reference genome
 2. Identification of valid paired interactions and removal of duplicates
-3. Library quality assessment via enrichment analysis at ChIP peak loci
+3. Library quality assessment and enrichment analysis at ChIP peak loci
 4. Generation of a Hi-C contact matrix in .hic format for visualization
 5. Generation of a binned contact map in Cooler (.cool) format
 6. Chromatin loop calling to identify significant interactions
